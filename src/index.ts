@@ -20,7 +20,7 @@ const toolRegistry = new ToolRegistry();
 const server = new Server(
   {
     name: "mongodb-mcp",
-    version: "0.1.0",
+    version: "0.1.1",
   },
   {
     capabilities: {
@@ -52,11 +52,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     const result = await tool.execute(args);
-    return { toolResult: result };
+    return result;
   } catch (error) {
     console.error("Operation failed:", error);
     return {
-      toolResult: {
         content: [
           {
             type: "text",
@@ -64,7 +63,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
         ],
         isError: true,
-      },
     };
   }
 });

@@ -1,3 +1,5 @@
+**This is a fork of https://github.com/QuantGeekDev/mongo-mcp**
+
 # 🗄️ MongoDB MCP Server for LLMS
 
 [![Node.js 18+](https://img.shields.io/badge/node-18%2B-blue.svg)](https://nodejs.org/en/)

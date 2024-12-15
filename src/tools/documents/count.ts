@@ -1,7 +1,8 @@
-import { db } from "../../mongodb/client.js";
+import { client } from "../../mongodb/client.js";
 import { BaseTool, ToolParams } from "../base/tool.js";
 
 export interface CountParams extends ToolParams {
+  database: string;
   collection: string;
   filter?: Record<string, unknown>;
 }
@@ -12,6 +13,10 @@ export class CountTool extends BaseTool<CountParams> {
   inputSchema = {
     type: "object" as const,
     properties: {
+      database: {
+        type: "string",
+        description: "Name of the database to use",
+      },
       collection: {
         type: "string",
         description: "Name of the collection to query",
@@ -22,13 +27,14 @@ export class CountTool extends BaseTool<CountParams> {
         default: {},
       },
     },
-    required: ["collection"],
+    required: ["database","collection"],
   };
 
   async execute(params: CountParams) {
     try {
+      const database = this.validateDatabase(params.database);
       const collection = this.validateCollection(params.collection);
-      const count = await db.collection(collection).countDocuments(params.filter || {});
+      const count = await client.db(database).collection(collection).countDocuments(params.filter || {});
 
       return {
         content: [

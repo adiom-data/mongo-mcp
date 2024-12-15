@@ -1,7 +1,8 @@
-import { db } from "../../mongodb/client.js";
+import { client } from "../../mongodb/client.js";
 import { BaseTool, ToolParams } from "../base/tool.js";
 
 interface InsertOneParams extends ToolParams {
+  database: string;
   collection: string;
   document: Record<string, unknown>;
   [key: string]: unknown;
@@ -13,6 +14,10 @@ export class InsertOneTool extends BaseTool<InsertOneParams> {
   inputSchema = {
     type: "object" as const,
     properties: {
+      database: {
+        type: "string",
+        description: "Name of the database to use",
+      },
       collection: {
         type: "string",
         description: "Name of the collection",
@@ -22,14 +27,15 @@ export class InsertOneTool extends BaseTool<InsertOneParams> {
         description: "Document to insert",
       },
     },
-    required: ["collection", "document"],
+    required: ["database","collection", "document"],
   };
 
   async execute(params: InsertOneParams) {
     try {
+      const database = this.validateDatabase(params.database);
       const collection = this.validateCollection(params.collection);
       const document = this.validateObject(params.document, "Document");
-      const result = await db.collection(collection).insertOne(document);
+      const result = await client.db(database).collection(collection).insertOne(document);
 
       return {
         content: [

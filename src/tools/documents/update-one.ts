@@ -1,7 +1,8 @@
-import { db } from "../../mongodb/client.js";
+import { client } from "../../mongodb/client.js";
 import { BaseTool, ToolParams } from "../base/tool.js";
 
 interface UpdateOneParams extends ToolParams {
+  database: string;
   collection: string;
   filter: Record<string, unknown>;
   update: Record<string, unknown>;
@@ -14,6 +15,10 @@ export class UpdateOneTool extends BaseTool<UpdateOneParams> {
   inputSchema = {
     type: "object" as const,
     properties: {
+      database: {
+        type: "string",
+        description: "Name of the database to use",
+      },
       collection: {
         type: "string",
         description: "Name of the collection",
@@ -27,15 +32,16 @@ export class UpdateOneTool extends BaseTool<UpdateOneParams> {
         description: "Update operations to apply",
       },
     },
-    required: ["collection", "filter", "update"],
+    required: ["database","collection", "filter", "update"],
   };
 
   async execute(params: UpdateOneParams) {
     try {
+      const database = this.validateDatabase(params.database);
       const collection = this.validateCollection(params.collection);
       const filter = this.validateObject(params.filter, "Filter");
       const update = this.validateObject(params.update, "Update");
-      const result = await db.collection(collection).updateOne(filter, update);
+      const result = await client.db(database).collection(collection).updateOne(filter, update);
 
       return {
         content: [

@@ -24,6 +24,16 @@ export abstract class BaseTool<T extends ToolParams = ToolParams> {
 
   abstract execute(params: T): Promise<ToolResponse>;
 
+  protected validateDatabase(database: unknown): string {
+    if (typeof database !== "string") {
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        `Database name must be a string, got ${typeof database}`
+      );
+    }
+    return database;
+  }
+
   protected validateCollection(collection: unknown): string {
     if (typeof collection !== "string") {
       throw new McpError(

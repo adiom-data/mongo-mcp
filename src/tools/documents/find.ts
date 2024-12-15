@@ -1,7 +1,8 @@
-import { db } from "../../mongodb/client.js";
+import { client } from "../../mongodb/client.js";
 import { BaseTool, ToolParams } from "../base/tool.js";
 
 export interface FindParams extends ToolParams {
+  database: string;
   collection: string;
   filter?: Record<string, unknown>;
   limit?: number;
@@ -14,6 +15,10 @@ export class FindTool extends BaseTool<FindParams> {
   inputSchema = {
     type: "object" as const,
     properties: {
+      database: {
+        type: "string",
+        description: "Name of the database to use",
+      },
       collection: {
         type: "string",
         description: "Name of the collection to query",
@@ -36,13 +41,15 @@ export class FindTool extends BaseTool<FindParams> {
         default: {},
       },
     },
-    required: ["collection"],
+    required: ["database","collection"],
   };
 
   async execute(params: FindParams) {
     try {
+      const database = this.validateDatabase(params.database);
       const collection = this.validateCollection(params.collection);
-      const results = await db
+      const results = await client
+        .db(database)
         .collection(collection)
         .find(params.filter || {})
         .project(params.projection || {})
